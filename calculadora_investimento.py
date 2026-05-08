@@ -124,8 +124,8 @@ class CalculadoraInvestimento:
                 f"Bruto: R$ {bruto:.2f}\n"
                 f"IR: R$ {ir:.2f}\n"
                 f"Líquido: R$ {liquido:.2f}\n"
-                f"Rentabilidade: {(liquido/capital_input - 1)*100:.2f}\n%"
-                f"=================="
+                f"Rentabilidade: {(liquido/capital_input - 1)*100:.2f}%\n"
+                f"================"
             )
             self.lbl_res.config(text=res_text)
 
