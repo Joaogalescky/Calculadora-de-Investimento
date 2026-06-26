@@ -94,8 +94,9 @@ class CalculadoraInvestimento:
         try:
             capital_input = float(self.ent_capital.get().replace(",", "."))
             tempo_input = float(self.ent_tempo.get())
+            tempo_tipo = self.var_tempo.get().strip().lower()
             tempo_anos = (
-                tempo_input / 12 if self.var_tempo.get() == "meses" else tempo_input
+                tempo_input / 12 if tempo_tipo == "meses" else tempo_input
             )
             ativo = self.combo_ativo.get()
             taxa_input = float(self.ent_taxa.get().replace(",", ".")) / 100
