@@ -1,12 +1,13 @@
+from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox, ttk
 import requests
-
+from tkcalendar import DateEntry
 
 class CalculadoraInvestimento:
     def __init__(self, root):
         self.root = root
-        self.root.title("Simulador financeiro")
+        self.root.title("Calculadora financeira")
         self.root.geometry("420x450")
 
         self.taxa_cdi_anual = self.buscar_cdi()
@@ -46,22 +47,16 @@ class CalculadoraInvestimento:
         self.ent_taxa.pack(fill="x", pady=5)
 
         # Tempo
-        ttk.Label(main_frame, text="Prazo:").pack(anchor="w")
-        frame_tempo = ttk.Frame(main_frame)
-        frame_tempo.pack(fill="x", pady=5)
-        
-        self.ent_tempo = ttk.Entry(frame_tempo)
-        self.ent_tempo.pack(side="left", fill="x", expand=True)
-
-        self.var_tempo = tk.StringVar(value="meses")
-        ttk.Radiobutton(
-            frame_tempo, text="Meses", variable=self.var_tempo, value="meses"
-        ).pack(side="left", padx=5)
-        ttk.Radiobutton(
-            frame_tempo, text="Anos", variable=self.var_tempo, value="anos"
-        ).pack(side="left")
-        
-        ttk.Label(main_frame, text="").pack()
+        ttk.Label(main_frame, text="Data de Vencimento:").pack(anchor="w")
+        self.ent_vencimento = DateEntry(
+            main_frame,
+            width=12,
+            background='darkblue',
+            foregound='white',
+            borderwidth=2,
+            date_pattern='dd/MM/yyyy'
+        )
+        self.ent_vencimento.pack(fill="x", pady=5)
 
         # Calcular
         self.btn_calc = tk.Button(
@@ -93,13 +88,24 @@ class CalculadoraInvestimento:
     def processar_calculo(self):
         try:
             capital_input = float(self.ent_capital.get().replace(",", "."))
-            tempo_input = float(self.ent_tempo.get())
-            tempo_tipo = self.var_tempo.get().strip().lower()
-            tempo_anos = (
-                tempo_input / 12 if tempo_tipo == "meses" else tempo_input
-            )
             ativo = self.combo_ativo.get()
             taxa_input = float(self.ent_taxa.get().replace(",", ".")) / 100
+
+            # Captura a data atual
+            data_hoje = datetime.now().date()
+
+            # Captura a data do componente
+            data_vencimento = self.ent_vencimento.get_date()
+
+            # Calcula diferença em dias
+            diferenca_dias = (data_vencimento - data_hoje).days
+
+            if diferenca_dias <= 0:
+                messagebox.showerror("Erro", "A data de vencimento deve ser maior que a data de hoje.")
+                return
+
+            # 4. Converte os dias exatos para anos (base 365)
+            tempo_anos = diferenca_dias / 365.0
 
             # Lógica de taxa por ativo
             if "Pós" in ativo:
@@ -120,19 +126,17 @@ class CalculadoraInvestimento:
             liquido = bruto - ir
 
             res_text = (
-                f"=== RESULTADO ===\n"
+                f"RESULTADO\n"
                 f"Taxa Aplicada: {taxa_anual*100:.2f}% a.a.\n"
                 f"Bruto: R$ {bruto:.2f}\n"
                 f"IR: R$ {ir:.2f}\n"
                 f"Líquido: R$ {liquido:.2f}\n"
                 f"Rentabilidade: {(liquido/capital_input - 1)*100:.2f}%\n"
-                f"================"
             )
             self.lbl_res.config(text=res_text)
 
         except Exception as e:
             messagebox.showerror("Erro", "Verifique os todos os campos foram preenchidos corretamente.")
-
 
 if __name__ == "__main__":
     root = tk.Tk()
